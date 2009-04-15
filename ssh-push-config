@@ -1,0 +1,32 @@
+#! /bin/bash
+# vim: sw=4 sts=4 et si
+#
+# Push my ssh client configuration to a target machine
+#
+
+if [ $# -lt 2 ]; then
+    echo "USAGE: ssh-push-config <user> <hostname>"
+    exit 1
+fi
+
+umask 077
+
+cd $HOME/.ssh
+if [ $? -gt 0 ]; then
+    "cd $HOME/.ssh failed"
+    exit 1
+fi
+
+user="$1"
+host="$2"
+target="$user@$host"
+
+cat authorized_keys | ssh $target "mkdir .ssh; chmod 700 .ssh; tee -a .ssh/authorized_keys; chmod 600 .ssh/authorized_keys"
+scp target-config $target:.ssh/config
+
+cd $HOME
+scp .bash_profile .root_bashrc $target:
+
+ssh $target mkdir -p bin
+scp bin/r $target:bin
+scp bin/ssh-push-config $target:bin
