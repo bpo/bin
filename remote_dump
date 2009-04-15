@@ -1,0 +1,9 @@
+#!/bin/bash
+#
+# Tar/bzips a directory and backs it up on a remote server
+#
+
+DIR=$1
+HOST="somnambulance.net"
+TARGET="goodies"
+tar -cjv $DIR | ssh $HOST "cat - > $TARGET/$DIR.tar.bz"
