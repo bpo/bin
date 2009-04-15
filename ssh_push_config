@@ -5,7 +5,7 @@
 #
 
 if [ $# -lt 2 ]; then
-    echo "USAGE: ssh-push-config <user> <hostname>"
+    echo "USAGE: ssh_push_config <user> <hostname>"
     exit 1
 fi
 
