@@ -29,4 +29,4 @@ scp .bash_profile .root_bashrc $target:
 
 ssh $target mkdir -p bin
 scp bin/r $target:bin
-scp bin/ssh-push-config $target:bin
+scp bin/ssh_push_config $target:bin
