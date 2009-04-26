@@ -8,7 +8,7 @@ if [ $# -lt 2 ]; then
     echo "USAGE: ssh_push_config <user> <hostname> <key>"
     echo "  <user> is the target user"
     echo "  <hostname> is the target host"
-    echo "  <key> is optional. This will filter authorized keys by those which match the grep string <key>"
+    echo "  <key> is optional. This will filter authorized keys by those that match the grep string <key>"
     exit 1
 fi
 
