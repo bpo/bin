@@ -5,7 +5,10 @@
 #
 
 if [ $# -lt 2 ]; then
-    echo "USAGE: ssh_push_config <user> <hostname>"
+    echo "USAGE: ssh_push_config <user> <hostname> <key>"
+    echo "  <user> is the target user"
+    echo "  <hostname> is the target host"
+    echo "  <key> is optional. This will filter authorized keys by those which match the grep string <key>"
     exit 1
 fi
 
@@ -19,9 +22,12 @@ fi
 
 user="$1"
 host="$2"
+authorized_cmd="grep ${3:-"-e ."}"
+echo "Using authorized keys which match $authorized_cmd"
+
 target="$user@$host"
 
-cat authorized_keys | ssh $target "mkdir .ssh; chmod 700 .ssh; tee -a .ssh/authorized_keys; chmod 600 .ssh/authorized_keys"
+${authorized_cmd} authorized_keys | ssh $target "mkdir .ssh; chmod 700 .ssh; tee -a .ssh/authorized_keys; chmod 600 .ssh/authorized_keys"
 scp target-config $target:.ssh/config
 
 cd $HOME
