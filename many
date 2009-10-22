@@ -1,0 +1,17 @@
+#! /bin/bash
+#
+# Execute something many times.
+#
+# >>: many 3 echo hello
+# hello
+# hello
+# hello
+# 
+
+t=$1
+shift
+
+for i in `gseq 1 $t`
+do
+  $@
+done
