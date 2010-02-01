@@ -1,0 +1,22 @@
+# /bin/bash
+# Initialize a new completely empty branch.
+
+if [ $# -lt 1 ]; then
+  echo "Usage: $0 <NEW_BRANCH>"
+  exit 1
+fi
+
+if [ -a $1 ]; then
+  echo "Error: file $1 exists locally."
+  exit 1
+fi
+
+mkdir $1
+cd $1
+git init
+git commit --allow-empty -m "Initializing empty branch $1"
+git push .. HEAD:$1
+cd ..
+rm -fR $1
+
+echo "Empty branch $1 created."
