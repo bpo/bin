@@ -1,0 +1,84 @@
+#! /usr/bin/env ruby -w
+
+# 
+# Codex is a hacky little way to maintain an archived semi-secure directory.
+# Once you have your environment set up, just run 'codex' and you'll be popped
+# into your directory in your favorite editor. As soon as the editor closes, all
+# changes are committed to git and the whole directory is encrypted.
+#
+# This doesn't bother with things like securing memory or ensuring removal of
+# files.
+#
+# Environment variables to consider:
+#
+# * CODEX_RECIPIENT - who the codex is encrypted 'to' with gpg
+# * CODEX_LOCATION  - a fixed directory where your archives will be stored.
+# * CODEX_EDITOR    - probably 'vi'
+# * CODEX_FILE      - file to start editing by default, passed as an argument to
+#                     the editor.
+# * CODEX_POSTPROCESS - a separate script that will be exec'd when this ends.
+#
+# -- bpo (2010)
+#
+
+class Codex
+  RECIPIENT = ENV['CODEX_RECIPIENT']
+  BASE      = ENV['CODEX_LOCATION']
+  EDITOR    = ENV['CODEX_EDITOR']
+  FILE      = ENV['CODEX_FILE']
+  POST      = ENV['CODEX_POSTPROCESS']
+
+  def log( something )
+    puts something if $verbose
+  end
+
+  def x(something)
+    log something
+    raise "failed to execute: #{something}" unless system(something)
+  end
+
+  def pushd( dir )
+    log "pushd #{dir}"
+    Dir.chdir( dir ) do
+      yield
+      log "popd"
+    end
+  end
+
+  def initialize
+    @recipient = RECIPIENT
+    @location = BASE
+  end
+
+  def run
+    stamp = Time.now.to_i
+    pushd( @location ) do
+      tarball = "codex_#{stamp}.tar.bz2"
+      x "gpg -o #{tarball} --decrypt codex.gpg"
+      x "mv codex.gpg backups/codex.#{stamp}.gpg"
+      x "tar -xjf #{tarball}"
+      x "rm #{tarball}"
+
+      pushd( "codex" ) do
+        x "#{EDITOR} #{FILE}"
+        x "git add -A"
+        # rescue all failures here - nastiness will go to stderr, but we want to
+        # bypass the return code of 1 that happens when there's nothing new to
+        # add/commit.
+        x "git ci -a -m 'Updating codex at #{Time.now.to_s}'" rescue true
+      end
+
+      x "tar -cjf #{tarball} codex"
+      x "rm -fR codex"
+      x "gpg -o codex.gpg -r #{@recipient} --encrypt #{tarball}"
+      x "rm #{tarball}"
+    end
+  end
+
+end
+
+$verbose = true
+if( $0 == __FILE__ )
+  Codex.new.run
+end
+exec Codex::POST

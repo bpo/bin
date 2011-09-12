@@ -1,0 +1,3 @@
+#! /bin/bash
+# trimmed fortune for screen statusbar
+fortune -sn 80 | tr '\n' ' '
