@@ -1,6 +1,6 @@
 #! /usr/bin/env ruby -w
 
-o =  ['!','@','#','$','%','&','*',(0..9),('a'..'z'),('A'..'Z')].map{|i| i.to_a}.flatten;  
+o =  [['!','@','#','$','%','&','*'],(0..9),('a'..'z'),('A'..'Z')].map{|i| i.to_a }.flatten;  
 string  =  (0..50).map{ o[rand(o.length)]  }.join;
 puts string
 
